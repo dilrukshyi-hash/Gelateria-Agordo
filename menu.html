@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Menu | Gelatariya Artisanal Gelato</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="pt-20 bg-gray-50 min-h-screen">
+
+    <header class="py-20 mt-10 relative overflow-hidden bg-white">
+        <div class="container mx-auto px-6 text-center" data-aos="fade-down">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6">Esplora i <span class="gradient-text italic">Gusti!</span></h1>
+            <p class="text-xl text-gray-500 max-w-2xl mx-auto">Scoprite la nostra selezione artigianale di gelato. Dai grandi classici alle ispirazioni stagionali più audaci.</p>
+        </div>
+        <div class="absolute -top-10 -right-10 bg-strawberry/10 w-64 h-64 rounded-full blur-[100px]"></div>
+    </header>
+
+    <div class="container mx-auto px-6 mb-20">
+        <!-- Category Filters -->
+        <div class="flex flex-wrap justify-center gap-4 mb-16" data-aos="fade-up">
+            <button class="filter-btn active px-8 py-3 rounded-full font-bold shadow-lg transition-all" data-category="all">Tutti i Gusti</button>
+            <button class="filter-btn px-8 py-3 rounded-full font-bold shadow-sm transition-all bg-white hover:shadow-lg" data-category="Frutta">Frutta</button>
+            <button class="filter-btn px-8 py-3 rounded-full font-bold shadow-sm transition-all bg-white hover:shadow-lg" data-category="Classici">Classici</button>
+            <button class="filter-btn px-8 py-3 rounded-full font-bold shadow-sm transition-all bg-white hover:shadow-lg" data-category="Tropicali">Tropicali</button>
+            <button class="filter-btn px-8 py-3 rounded-full font-bold shadow-sm transition-all bg-white hover:shadow-lg" data-category="Rinfrescanti">Rinfrescanti</button>
+        </div>
+
+
+        <!-- Products Grid -->
+        <div id="products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Dynamic products -->
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/db.js"></script>
+    <script src="assets/js/ui.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            let allProducts = [];
+            const grid = document.getElementById('products-grid');
+            const btns = document.querySelectorAll('.filter-btn');
+
+            // Wait for DB wrap
+            setTimeout(async () => {
+                allProducts = await window.gelatoDB.getAll('products');
+                renderProducts(allProducts);
+            }, 500);
+
+            function renderProducts(products) {
+                grid.innerHTML = products.map((p, index) => `
+                    <div class="glass-card p-6 bg-white overflow-hidden shadow-xl" data-aos="fade-up" data-aos-delay="${index * 100}">
+                        <div class="relative rounded-2xl overflow-hidden mb-6 aspect-[4/5] group">
+                            <img src="${p.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="${p.name}">
+                            ${p.isBestSeller ? '<span class="absolute top-4 left-4 bg-yellow-400 text-black px-3 py-1 rounded-full text-xs font-bold uppercase shadow-lg">Best Seller</span>' : ''}
+                        </div>
+                        <span class="text-xs font-bold text-strawberry uppercase tracking-widest mb-2 block">${p.category}</span>
+                        <h3 class="text-2xl font-bold mb-3">${p.name}</h3>
+                        <p class="text-gray-500 mb-6 text-sm line-clamp-2">${p.description}</p>
+                        <div class="flex items-center justify-between mt-auto">
+                            <span class="text-xl font-bold text-gray-800">€ ${p.price.toFixed(2)}</span>
+                            <button class="bg-gray-900 text-white p-3 rounded-xl hover:bg-strawberry transition-all group shadow-md hover:shadow-strawberry/40">
+                                <svg class="w-6 h-6 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+
+            btns.forEach(btn => {
+                btn.onclick = () => {
+                    btns.forEach(b => {
+                        b.classList.remove('active', 'bg-strawberry', 'text-white');
+                        b.classList.add('bg-white', 'text-gray-700');
+                    });
+                    btn.classList.add('active', 'bg-strawberry', 'text-white');
+                    btn.classList.remove('bg-white', 'text-gray-700');
+
+                    const cat = btn.dataset.category;
+                    const filtered = cat === 'all' ? allProducts : allProducts.filter(p => p.category === cat);
+                    renderProducts(filtered);
+                };
+            });
+        });
+
+        // Add CSS trick for active btn
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .filter-btn.active { background: #FF69B4; color: #FFFFFF; }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
